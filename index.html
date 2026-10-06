@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMSMP1 Store - Negozio Ufficiale</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0d0d11',
+                        panelBg: '#16161f',
+                        panelCard: '#1f1f2e',
+                        neonCyan: '#00f3ff',
+                        neonPurple: '#b026ff',
+                        neonOrange: '#ff6600',
+                        neonGreen: '#00ff88',
+                        neonRed: '#ff2a5f'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Orbitron -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d0d11;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.4)); }
+            50% { transform: translateY(-6px); filter: drop-shadow(0 0 20px rgba(176, 38, 255, 0.7)); }
+            100% { transform: translateY(0px); filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.4)); }
+        }
+        .animate-floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-heartbeat {
+            animation: heartbeat 2s infinite ease-in-out;
+        }
+
+        @keyframes breathingBorder {
+            0%, 100% { border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+            50% { border-color: rgba(255, 215, 0, 1); box-shadow: 0 0 24px rgba(255, 215, 0, 0.6); }
+        }
+        .breathing-active {
+            animation: breathingBorder 3s infinite ease-in-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0d11;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f2e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b026ff;
+        }
+        
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col relative selection:bg-purple-500 selection:text-white">
+
+    <canvas id="particleCanvas" class="canvas-container"></canvas>
+
+    <header class="w-full bg-[#111118]/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between z-40 sticky top-0">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-[#16161f] px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold text-slate-300">
+                <i class="fa-solid fa-coins text-yellow-400"></i>
+                <span>VALUTA EUR €</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 bg-[#16161f] px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold text-slate-300">
+                <i class="fa-solid fa-globe text-cyan-400"></i>
+                <span>LINGUA IT ITALIAN</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Cart Button -->
+            <button onclick="toggleCart()" class="relative bg-gradient-to-r from-purple-900/60 to-slate-800 hover:from-purple-800 hover:to-slate-700 border border-purple-500/40 text-white px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all duration-300 shadow-lg shadow-purple-950/50 cursor-pointer">
+                <i class="fa-solid fa-cart-shopping text-neonCyan"></i>
+                <span>CARRELLO</span>
+                <span id="cartBadge" class="absolute -top-1.5 -right-1.5 bg-neonRed text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black animate-pulse">0</span>
+            </button>
+
+            <!-- User profile box with Minecraft skin head -->
+            <div class="flex items-center gap-2 bg-[#16161f] px-3 py-1.5 rounded-xl border border-slate-800">
+                <img id="utilitySkinHead" src="https://minotar.net/avatar/COLUICHETOSSERVA/32.png" alt="Skin Avatar" class="w-6 h-6 rounded border border-purple-500/50">
+                <span id="utilityUsername" class="text-xs font-bold tracking-wide text-cyan-300 font-cyber">COLUICHETOSSERVA</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 relative z-10 min-h-[calc(100vh-49px)]">
+        
+        <aside class="w-20 md:w-64 bg-[#121219]/95 backdrop-blur border-r border-slate-800/80 flex flex-col justify-between py-6 px-3 md:px-4 z-30 shrink-0">
+            <div class="space-y-6">
+                <!-- Server Brand -->
+                <div class="flex items-center gap-3 px-2">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/20 font-black text-xl text-darkBg font-cyber">
+                        L
+                    </div>
+                    <div class="hidden md:block">
+                        <h1 class="font-cyber font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500">LMSMP1</h1>
+                        <p class="text-[10px] text-slate-400 font-medium tracking-widest uppercase">Official Store</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Links (4 items, Rules removed) -->
+                <nav class="space-y-2 mt-8">
+                    <!-- Home -->
+                    <button onclick="switchTab('home')" id="nav-home" class="nav-btn w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl transition-all duration-300 group text-slate-400 hover:text-white hover:bg-[#1c1c2b] hover:scale-[1.03]">
+                        <div class="w-9 h-9 rounded-xl bg-[#1a1a26] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-house text-cyan-400 text-sm"></i>
+                        </div>
+                        <span class="hidden md:block font-semibold text-sm tracking-wide">Home</span>
+                    </button>
+
+                    <!-- Ranks -->
+                    <button onclick="switchTab('ranks')" id="nav-ranks" class="nav-btn w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl transition-all duration-300 group text-slate-400 hover:text-white hover:bg-[#1c1c2b] hover:scale-[1.03]">
+                        <div class="w-9 h-9 rounded-xl bg-[#1a1a26] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-crown text-amber-400 text-sm"></i>
+                        </div>
+                        <span class="hidden md:block font-semibold text-sm tracking-wide">Ranks</span>
+                    </button>
+
+                    <!-- Token -->
+                    <button onclick="switchTab('tokens')" id="nav-tokens" class="nav-btn w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl transition-all duration-300 group text-slate-400 hover:text-white hover:bg-[#1c1c2b] hover:scale-[1.03]">
+                        <div class="w-9 h-9 rounded-xl bg-[#1a1a26] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-gem text-purple-400 text-sm"></i>
+                        </div>
+                        <span class="hidden md:block font-semibold text-sm tracking-wide">Token</span>
+                    </button>
+
+                    <!-- UNBAN -->
+                    <button onclick="switchTab('unban')" id="nav-unban" class="nav-btn w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl transition-all duration-300 group text-slate-400 hover:text-white hover:bg-[#1c1c2b] hover:scale-[1.03]">
+                        <div class="w-9 h-9 rounded-xl bg-[#1a1a26] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-shield-halved text-red-400 text-sm"></i>
+                        </div>
+                        <span class="hidden md:block font-semibold text-sm tracking-wide">UNBAN</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Bottom Floating Discount Badge -->
+            <div class="hidden md:block bg-gradient-to-r from-emerald-950/80 to-slate-900 border border-neonGreen/40 p-3.5 rounded-2xl shadow-xl shadow-emerald-950/30 animate-heartbeat">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-neonGreen flex items-center justify-center text-neonGreen">
+                        <i class="fa-solid fa-tag text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Promozione</p>
+                        <p class="text-xs font-black text-white tracking-wide">SCONTO -20% ATTIVO</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto">
+            
+            <!-- SECTION A: HOME & ACCESSO -->
+            <div id="section-home" class="tab-section space-y-8">
+                <!-- Main Header with Section Title -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-cyan-400 font-cyber">Dashboard Principale</span>
+                        <h2 class="text-2xl md:text-3xl font-black font-cyber tracking-wide text-white">HOME</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            Server Online
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Hero Banner -->
+                <div class="relative rounded-3xl overflow-hidden border border-slate-800 bg-[#16161f] shadow-2xl">
+                    <div class="absolute inset-0 z-0 opacity-30 bg-cover bg-center" style="background-image: url('https://placehold.co/1200x500/111118/333344?text=Minecraft+Shader+Landscape');"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0d0d11] via-[#0d0d11]/70 to-transparent z-10"></div>
+                    
+                    <div class="relative z-20 p-8 md:p-12 flex flex-col items-center text-center space-y-6">
+                        <!-- Crown & 3D Cartoon Title -->
+                        <div class="relative">
+                            <div class="absolute -top-7 left-1/2 -translate-x-1/2 text-yellow-400 text-3xl animate-bounce">
+                                <i class="fa-solid fa-crown drop-shadow-[0_0_12px_rgba(234,179,8,0.9)]"></i>
+                            </div>
+                            <h1 class="text-4xl md:text-6xl font-black font-cyber tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-amber-600 drop-shadow-[0_5px_15px_rgba(255,102,0,0.5)] mt-3">
+                                LMSMP1
+                            </h1>
+                        </div>
+                        <p class="text-slate-300 max-w-xl text-sm md:text-base font-medium">
+                            Il negozio ufficiale del server. Sblocca gradi esclusivi, ottieni token istantaneamente e domina la classifica!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Info Widgets Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Server IP Widget -->
+                    <div class="bg-[#16161f] border border-slate-800 hover:border-cyan-500/40 p-6 rounded-3xl transition-all duration-300 shadow-xl flex items-center justify-between group">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider font-cyber">
+                                <i class="fa-solid fa-server"></i>
+                                IP Ufficiale
+                            </div>
+                            <h3 id="serverIpText" class="text-lg md:text-xl font-bold font-cyber text-white">lmsmp1.aternos.me</h3>
+                            <p class="text-xs text-emerald-400 font-semibold"><span id="onlinePlayersCount">348</span> giocatori online ora</p>
+                        </div>
+                        <button onclick="copyServerIp()" class="bg-cyan-500/10 hover:bg-cyan-500 text-cyan-400 hover:text-darkBg border border-cyan-500/40 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 cursor-pointer shadow-lg">
+                            <i class="fa-solid fa-copy text-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Discord Widget -->
+                    <div class="bg-[#16161f] border border-slate-800 hover:border-purple-500/40 p-6 rounded-3xl transition-all duration-300 shadow-xl flex items-center justify-between group">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider font-cyber">
+                                <i class="fa-brands fa-discord"></i>
+                                Community Discord
+                            </div>
+                            <h3 class="text-lg md:text-xl font-bold font-cyber text-white">discord.gg/lmsmp1</h3>
+                            <p class="text-xs text-purple-400 font-semibold">1.420 membri online</p>
+                        </div>
+                        <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="bg-purple-500/10 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/40 w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-lg">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Pannello di Benvenuto & Login -->
+                <div class="bg-gradient-to-br from-[#16161f] to-[#1c1c2b] border border-slate-800 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="max-w-2xl mx-auto space-y-6 text-center">
+                        <div class="space-y-2">
+                            <h3 class="text-2xl font-black font-cyber text-white">BENVENUTO</h3>
+                            <p class="text-slate-400 text-sm">Inserisci il tuo nome utente Minecraft per iniziare</p>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <!-- Skin Head Preview -->
+                            <div class="flex items-center gap-3 bg-[#0d0d11] border border-slate-800 px-4 py-3 rounded-2xl w-full sm:w-auto">
+                                <img id="loginSkinHead" src="https://minotar.net/avatar/COLUICHETOSSERVA/40.png" alt="Skin Avatar" class="w-8 h-8 rounded border border-orange-500/50">
+                                <input type="text" id="usernameInput" value="COLUICHETOSSERVA" oninput="updateUsername(this.value)" placeholder="Nome utente..." class="bg-transparent text-white font-bold outline-none text-sm tracking-wide w-full sm:w-48 font-cyber">
+                            </div>
+
+                            <!-- Pulsante CONTINUA con battito cardiaco -->
+                            <button onclick="switchTab('ranks')" class="animate-heartbeat w-full sm:w-auto bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-darkBg font-black px-8 py-3.5 rounded-2xl transition-all duration-300 shadow-lg shadow-orange-500/30 text-sm tracking-wider font-cyber cursor-pointer">
+                                CONTINUA <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-500 italic">La tua skin apparirà automaticamente</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION B: RANKS -->
+            <div id="section-ranks" class="tab-section hidden space-y-8">
+                <!-- Main Header with Section Title -->
+                <div class="border-b border-slate-800/80 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-widest text-amber-400 font-cyber">Gradi VIP</span>
+                    <h2 class="text-2xl md:text-3xl font-black font-cyber tracking-wide text-white">ACQUISTA UN RANK</h2>
+                    <p class="text-slate-400 text-sm mt-1">Scegli il grado perfetto per dominare sul server</p>
+                </div>
+
+                <!-- 4 Columns Products Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    
+                    <!-- Rank 1: Novellino -->
+                    <div class="bg-panelCard border border-slate-800 hover:border-cyan-500/50 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 shadow-xl relative group">
+                        <div class="space-y-6">
+                            <!-- Icon with Floating Animation -->
+                            <div class="w-20 h-20 mx-auto rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-crown text-3xl text-cyan-400"></i>
+                            </div>
+                            <div class="text-center space-y-1">
+                                <h3 class="text-lg font-black font-cyber text-white">Rank Novellino</h3>
+                                <div class="text-2xl font-black font-cyber text-cyan-400">€8,00</div>
+                            </div>
+                            <!-- Perks List -->
+                            <ul class="space-y-2.5 text-xs text-slate-300">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400 font-bold"></i> ✓ X Home (3 slot)</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400 font-bold"></i> ✓ Kit VIP Base</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-cyan-400 font-bold"></i> ✓ Custom Rank</li>
+                            </ul>
+                        </div>
+                        <button onclick="addToCart('Rank Novellino', 8.00, 'fa-crown')" class="mt-6 w-full bg-[#16161f] hover:bg-cyan-500 hover:text-darkBg border border-cyan-500/40 text-cyan-400 py-3 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg cursor-pointer font-cyber">
+                            ACQUISTA ORA
+                        </button>
+                    </div>
+
+                    <!-- Rank 2: Guardiano (POPULAR) -->
+                    <div class="bg-panelCard border-2 border-red-500/80 hover:border-red-400 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 shadow-2xl shadow-red-950/40 relative group">
+                        <!-- Badge POPOLARE -->
+                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-neonRed text-white px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                            POPOLARE
+                        </div>
+                        <div class="space-y-6">
+                            <!-- Icon with Floating Animation -->
+                            <div class="w-20 h-20 mx-auto rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-user-shield text-3xl text-purple-400"></i>
+                            </div>
+                            <div class="text-center space-y-1">
+                                <h3 class="text-lg font-black font-cyber text-white">Rank Guardiano</h3>
+                                <div class="text-2xl font-black font-cyber text-purple-400">€15,00</div>
+                            </div>
+                            <!-- Perks List -->
+                            <ul class="space-y-2.5 text-xs text-slate-300">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400 font-bold"></i> ✓ X Home (7 slot)</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400 font-bold"></i> ✓ Kit VIP Avanzato</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-purple-400 font-bold"></i> ✓ Custom Rank Colorato</li>
+                            </ul>
+                        </div>
+                        <button onclick="addToCart('Rank Guardiano', 15.00, 'fa-user-shield')" class="mt-6 w-full bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg shadow-purple-900/50 cursor-pointer font-cyber">
+                            ACQUISTA ORA
+                        </button>
+                    </div>
+
+                    <!-- Rank 3: Imperatore (TOP) -->
+                    <div class="bg-panelCard border-2 border-orange-500/80 hover:border-orange-400 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 shadow-2xl shadow-orange-950/40 relative group">
+                        <!-- Badge TOP -->
+                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-neonOrange text-darkBg px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                            TOP
+                        </div>
+                        <div class="space-y-6">
+                            <!-- Icon with Floating Animation -->
+                            <div class="w-20 h-20 mx-auto rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-chess-rook text-3xl text-orange-400"></i>
+                            </div>
+                            <div class="text-center space-y-1">
+                                <h3 class="text-lg font-black font-cyber text-white">Rank Imperatore</h3>
+                                <div class="text-2xl font-black font-cyber text-orange-400">€25,00</div>
+                            </div>
+                            <!-- Perks List -->
+                            <ul class="space-y-2.5 text-xs text-slate-300">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-orange-400 font-bold"></i> ✓ X Home (15 slot)</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-orange-400 font-bold"></i> ✓ Kit VIP Leggendario</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-orange-400 font-bold"></i> ✓ Custom Rank Supremo</li>
+                            </ul>
+                        </div>
+                        <button onclick="addToCart('Rank Imperatore', 25.00, 'fa-chess-rook')" class="mt-6 w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-darkBg font-black py-3 rounded-2xl text-xs tracking-wider transition-all duration-300 shadow-lg shadow-orange-500/30 cursor-pointer font-cyber">
+                            ACQUISTA ORA
+                        </button>
+                    </div>
+
+                    <!-- Rank 4: Senatore -->
+                    <div class="bg-panelCard border border-slate-800 hover:border-yellow-400/50 rounded-3xl p-6 flex flex-col justify-between transition-all duration-300 shadow-xl relative group">
+                        <div class="space-y-6">
+                            <!-- Icon with Floating Animation -->
+                            <div class="w-20 h-20 mx-auto rounded-2xl bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-crown text-3xl text-yellow-400"></i>
+                            </div>
+                            <div class="text-center space-y-1">
+                                <h3 class="text-lg font-black font-cyber text-white">Rank Senatore</h3>
+                                <div class="text-2xl font-black font-cyber text-yellow-400">€37,00</div>
+                            </div>
+                            <!-- Perks List -->
+                            <ul class="space-y-2.5 text-xs text-slate-300">
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-400 font-bold"></i> ✓ X Home Illimitate</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-400 font-bold"></i> ✓ Kit VIP Senatore</li>
+                                <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-400 font-bold"></i> ✓ Corona Imperial-Futuristica</li>
+                            </ul>
+                        </div>
+                        <button onclick="addToCart('Rank Senatore', 37.00, 'fa-crown')" class="mt-6 w-full bg-[#16161f] hover:bg-yellow-400 hover:text-darkBg border border-yellow-500/40 text-yellow-400 py-3 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg cursor-pointer font-cyber">
+                            ACQUISTA ORA
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION C: VALUTA (TOKEN) -->
+            <div id="section-tokens" class="tab-section hidden space-y-8">
+                <!-- Main Header with Section Title -->
+                <div class="border-b border-slate-800/80 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-widest text-purple-400 font-cyber">Cristalli & Valuta</span>
+                    <h2 class="text-2xl md:text-3xl font-black font-cyber tracking-wide text-white flex items-center gap-3">
+                        ACQUISTA TOKEN <i class="fa-solid fa-gem text-purple-400 text-xl animate-pulse"></i>
+                    </h2>
+                    <p class="text-slate-400 text-sm mt-1">Ottieni valuta in-game istantaneamente</p>
+                </div>
+
+                <!-- 3 Token Packages Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <!-- TOKEN 1K -->
+                    <div class="bg-panelCard border border-slate-800 hover:border-cyan-500/40 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 shadow-xl relative">
+                        <div class="space-y-6 text-center">
+                            <div class="w-24 h-24 mx-auto rounded-full bg-cyan-500/10 border-2 border-cyan-500/40 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-gem text-4xl text-cyan-400"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="text-xl font-black font-cyber text-white">TOKEN 1K</h3>
+                                <p class="text-slate-400 text-xs">Cristalli digitali base</p>
+                            </div>
+                            <div class="text-3xl font-black font-cyber text-cyan-400">€3,00</div>
+                        </div>
+                        <button onclick="addToCart('Token 1K', 3.00, 'fa-gem')" class="mt-8 w-full bg-[#16161f] hover:bg-cyan-500 hover:text-darkBg border border-cyan-500/50 text-cyan-400 py-3.5 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            Paga con PayPal
+                        </button>
+                    </div>
+
+                    <!-- TOKEN 5K -->
+                    <div class="bg-panelCard border border-slate-800 hover:border-purple-500/40 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 shadow-xl relative">
+                        <div class="space-y-6 text-center">
+                            <div class="w-24 h-24 mx-auto rounded-full bg-purple-500/10 border-2 border-purple-500/40 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-gem text-4xl text-purple-400"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="text-xl font-black font-cyber text-white">TOKEN 5K</h3>
+                                <p class="text-slate-400 text-xs">Cristalli digitali avanzati</p>
+                            </div>
+                            <div class="text-3xl font-black font-cyber text-purple-400">€12,00</div>
+                        </div>
+                        <button onclick="addToCart('Token 5K', 12.00, 'fa-gem')" class="mt-8 w-full bg-[#16161f] hover:bg-purple-600 hover:text-white border border-purple-500/50 text-purple-400 py-3.5 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            Paga con PayPal
+                        </button>
+                    </div>
+
+                    <!-- TOKEN 10K (BEST VALUE) -->
+                    <div class="bg-panelCard border-2 border-purple-500 hover:border-purple-400 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 shadow-2xl shadow-purple-950/50 relative">
+                        <!-- BEST VALUE Badge -->
+                        <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                            BEST VALUE
+                        </div>
+                        <div class="space-y-6 text-center">
+                            <div class="w-24 h-24 mx-auto rounded-full bg-purple-600/20 border-2 border-purple-400 flex items-center justify-center animate-floating">
+                                <i class="fa-solid fa-gem text-4xl text-purple-300"></i>
+                            </div>
+                            <div class="space-y-1">
+                                <h3 class="text-xl font-black font-cyber text-white">TOKEN 10K</h3>
+                                <p class="text-slate-400 text-xs">Cristalli digitali supremi</p>
+                            </div>
+                            <div class="text-3xl font-black font-cyber text-purple-300">€22,00</div>
+                        </div>
+                        <button onclick="addToCart('Token 10K', 22.00, 'fa-gem')" class="mt-8 w-full bg-purple-600 hover:bg-purple-500 text-white py-3.5 rounded-2xl font-bold text-xs tracking-wider transition-all duration-300 shadow-lg shadow-purple-900/50 cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            Paga con PayPal
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECTION D: UNBAN -->
+            <div id="section-unban" class="tab-section hidden space-y-8">
+                <!-- Main Header with Section Title -->
+                <div class="border-b border-slate-800/80 pb-4">
+                    <span class="text-xs font-bold uppercase tracking-widest text-red-400 font-cyber">Supporto & Sanzioni</span>
+                    <h2 class="text-2xl md:text-3xl font-black font-cyber tracking-wide text-white">RIMOZIONE SANZIONI / UNBAN</h2>
+                    <p class="text-slate-400 text-sm mt-1">Torna a giocare immediatamente sui nostri server</p>
+                </div>
+
+                <!-- Unban Card Container -->
+                <div class="max-w-xl mx-auto bg-panelCard border border-slate-800 hover:border-red-500/40 rounded-3xl p-8 shadow-2xl relative overflow-hidden space-y-8">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-red-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <!-- Icon & Title -->
+                    <div class="text-center space-y-4">
+                        <div class="w-20 h-20 mx-auto rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center animate-floating">
+                            <i class="fa-solid fa-lock-open text-3xl text-neonRed"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-xl font-black font-cyber text-neonRed">UNBAN COMPLETO</h3>
+                            <div class="text-3xl font-black font-cyber text-orange-400">€8,00</div>
+                        </div>
+                    </div>
+
+                    <!-- Features List -->
+                    <ul class="space-y-3 text-sm text-slate-300 bg-[#121219] p-5 rounded-2xl border border-slate-800/80">
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-red-400 font-bold"></i> Rimozione ban permanente</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-red-400 font-bold"></i> Accesso immediato</li>
+                        <li class="flex items-center gap-3"><i class="fa-solid fa-check text-red-400 font-bold"></i> Supporto Discord</li>
+                    </ul>
+
+                    <!-- Multiple Payment Buttons -->
+                    <div class="space-y-3 pt-2">
+                        <!-- Orange PayPal Button -->
+                        <button onclick="addToCart('Unban Completo', 8.00, 'fa-lock-open')" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-darkBg font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all duration-300 shadow-lg shadow-orange-500/20 cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-paypal text-base"></i> Paga con PayPal
+                        </button>
+
+                        <!-- Blue Revolut Button -->
+                        <button onclick="addToCart('Unban Completo (Revolut)', 8.00, 'fa-lock-open')" class="w-full bg-[#0075eb] hover:bg-[#005ec4] text-white font-bold py-3.5 rounded-2xl text-xs tracking-wider transition-all duration-300 shadow-lg cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-credit-card text-base"></i> Paga con Revolut
+                        </button>
+
+                        <!-- Transparent Orange Outline Button -->
+                        <button onclick="addToCart('Unban Completo', 8.00, 'fa-lock-open')" class="w-full bg-transparent hover:bg-orange-500/10 border-2 border-orange-500 text-orange-400 font-bold py-3.5 rounded-2xl text-xs tracking-wider transition-all duration-300 cursor-pointer font-cyber flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cart-plus text-base"></i> AGGIUNGI AL CARRELLO
+                        </button>
+                    </div>
+
+                    <!-- Revtag Note -->
+                    <div class="text-center pt-2">
+                        <p class="text-xs text-slate-400">oppure paga tramite il mio Revtag! <span class="text-cyan-400 font-bold">@apioli</span></p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div id="cartOverlay" onclick="toggleCart()" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden transition-opacity duration-300"></div>
+
+    <!-- Cart Drawer -->
+    <div id="cartDrawer" class="fixed top-0 right-0 w-full sm:w-96 h-full bg-[#16161f] border-l border-slate-800 z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between shadow-2xl">
+        <!-- Cart Header -->
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2 font-cyber font-bold text-white">
+                <i class="fa-solid fa-cart-shopping text-cyan-400"></i>
+                <span>IL TUO CARRELLO</span>
+            </div>
+            <button onclick="toggleCart()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-800 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-4">
+            <div id="emptyCartMessage" class="text-center py-16 space-y-3">
+                <div class="w-16 h-16 mx-auto rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 text-2xl">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </div>
+                <p class="text-sm text-slate-400 font-medium">Il tuo carrello è vuoto.</p>
+            </div>
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="p-5 border-t border-slate-800 bg-[#121219] space-y-4">
+            <div class="flex items-center justify-between text-sm">
+                <span class="text-slate-400">Utente Minecraft:</span>
+                <span id="cartUsernameDisplay" class="font-bold text-cyan-400 font-cyber">COLUICHETOSSERVA</span>
+            </div>
+            <div class="flex items-center justify-between text-base font-bold">
+                <span class="text-white">Totale:</span>
+                <span id="cartTotalPrice" class="text-orange-400 font-cyber text-xl">€0,00</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-darkBg font-black py-3.5 rounded-2xl text-xs tracking-wider transition-all duration-300 shadow-lg shadow-emerald-950/50 font-cyber cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" id="checkoutBtn" disabled>
+                PROCEDI AL PAGAMENTO
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 bg-[#16161f] border border-cyan-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl z-50 transform translate-y-32 opacity-0 transition-all duration-300 flex items-center gap-3">
+        <div id="toastIcon" class="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div>
+            <h4 id="toastTitle" class="text-xs font-bold text-white font-cyber">Successo</h4>
+            <p id="toastMessage" class="text-[11px] text-slate-300">Prodotto aggiunto al carrello.</p>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        let currentUsername = "COLUICHETOSSERVA";
+
+        // Tab Switching with active gold breathing border on Ranks
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border', 'border-amber-400', 'bg-[#1c1c2b]', 'text-white', 'breathing-active');
+                btn.classList.add('text-slate-400');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('bg-[#1c1c2b]', 'text-white');
+                if (tabId === 'ranks') {
+                    activeBtn.classList.add('border-2', 'border-amber-400', 'breathing-active');
+                } else {
+                    activeBtn.classList.add('border', 'border-cyan-400/80');
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Username sync
+        function updateUsername(val) {
+            currentUsername = val.trim() || "Steve";
+            document.getElementById('utilityUsername').textContent = currentUsername;
+            document.getElementById('cartUsernameDisplay').textContent = currentUsername;
+            const skinUrl = `https://minotar.net/avatar/${encodeURIComponent(currentUsername)}`;
+            document.getElementById('utilitySkinHead').src = `${skinUrl}/32.png`;
+            document.getElementById('loginSkinHead').src = `${skinUrl}/40.png`;
+        }
+
+        // Copy IP
+        function copyServerIp() {
+            const ip = "lmsmp1.aternos.me";
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(ip).then(() => {
+                    showToast("IP Copiato!", "Indirizzo IP copiato negli appunti.", "fa-copy");
+                });
+            } else {
+                const textarea = document.createElement("textarea");
+                textarea.value = ip;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                showToast("IP Copiato!", "Indirizzo IP copiato negli appunti.", "fa-copy");
+            }
+        }
+
+        // Cart Drawer
+        function toggleCart() {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('cartOverlay');
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Cart Management
+        function addToCart(name, price, iconClass) {
+            cart.push({ id: Date.now(), name, price, icon: iconClass });
+            updateCartUI();
+            showToast("Carrello aggiornato", `${name} aggiunto al carrello.`, "fa-cart-shopping");
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const container = document.getElementById('cartItemsContainer');
+            const badge = document.getElementById('cartBadge');
+            const totalDisplay = document.getElementById('cartTotalPrice');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+
+            badge.textContent = cart.length;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 space-y-3">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 text-2xl">
+                            <i class="fa-solid fa-basket-shopping"></i>
+                        </div>
+                        <p class="text-sm text-slate-400 font-medium">Il tuo carrello è vuoto.</p>
+                    </div>
+                `;
+                totalDisplay.textContent = "€0,00";
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            checkoutBtn.disabled = false;
+            let total = 0;
+            container.innerHTML = "";
+
+            cart.forEach(item => {
+                total += item.price;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-[#121219] p-3.5 rounded-2xl border border-slate-800";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+                            <i class="fa-solid ${item.icon} text-sm"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white font-cyber">${item.name}</h4>
+                            <p class="text-xs text-orange-400 font-bold">€${item.price.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart(${item.id})" class="text-slate-500 hover:text-red-400 p-2 transition-colors">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            totalDisplay.textContent = `€${total.toFixed(2)}`;
+        }
+
+        function checkout() {
+            if (cart.length === 0) return;
+            showToast("Reindirizzamento...", `Connessione al gateway sicuro per ${currentUsername}...`, "fa-shield-halved");
+            setTimeout(() => {
+                showToast("Pagamento Completato!", "Grazie per il supporto a LMSMP1!", "fa-circle-check");
+                cart = [];
+                updateCartUI();
+                toggleCart();
+            }, 2000);
+        }
+
+        function showToast(title, message, icon) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            document.getElementById('toastIcon').innerHTML = `<i class="fa-solid ${icon}"></i>`;
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 3500);
+        }
+
+        // Particle background animation
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = Array.from({ length: 45 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2.5 + 1,
+            speedX: (Math.random() - 0.5) * 0.4,
+            speedY: (Math.random() - 0.5) * 0.4,
+            color: Math.random() > 0.5 ? 'rgba(0, 243, 255, 0.3)' : 'rgba(176, 38, 255, 0.3)'
+        }));
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.rect(p.x, p.y, p.size, p.size);
+                ctx.fill();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // Start on Home tab
+        switchTab('home');
+    </script>
+</body>
+</html>
